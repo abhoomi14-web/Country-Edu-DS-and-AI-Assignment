@@ -74,7 +74,7 @@ XGBoost inference on pre-computed features is fast — batch prediction on a few
 ## Running the Code
 
 ```bash
-pip install xgboost tensorflow scikit-learn pandas numpy river fastapi uvicorn imbalanced-learn joblib
+python -m pip install -r ../requirements_q1.txt
 python Q1_server_failure_prediction.py
 ```
 

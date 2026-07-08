@@ -78,7 +78,7 @@ The DistilBERT + TF-IDF ensemble gets there on well-labeled historical data. The
 ## Running the Code
 
 ```bash
-pip install transformers torch sentence-transformers faiss-cpu scikit-learn pandas numpy pillow pytesseract ftfy joblib
+python -m pip install -r ../requirements_q2.txt
 python Q2_ticket_auto_resolution.py
 ```
 

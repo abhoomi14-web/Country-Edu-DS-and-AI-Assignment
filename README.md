@@ -20,7 +20,7 @@ Bhoomi FInal Submission/
 Requires Python 3.10+.
 
 ```bash
-pip install -r requirements_q1.txt
+python -m pip install -r requirements_q1.txt
 python DS_AI_Solutions/Q1_server_failure_prediction.py
 ```
 
@@ -29,7 +29,7 @@ The demo generates synthetic telemetry for 100 servers over 48 hours, trains the
 ## Running Q2
 
 ```bash
-pip install -r requirements_q2.txt
+python -m pip install -r requirements_q2.txt
 python DS_AI_Solutions/Q2_ticket_auto_resolution.py
 ```
 
