@@ -5,7 +5,7 @@ Two solutions for the DS & AI problem set, covering server failure prediction an
 ## Structure
 
 ```
-Gbdu FInal Submission/
+Bhoomi FInal Submission/
 ├── requirements_q1.txt               — dependencies for Q1
 ├── requirements_q2.txt               — dependencies for Q2
 └── DS_AI_Solutions/
