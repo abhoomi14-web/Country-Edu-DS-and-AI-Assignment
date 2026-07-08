@@ -19,6 +19,6 @@ ftfy>=6.1.0
 # pillow>=10.0.0
 # pytesseract>=0.3.10
 
-# Optional — enables the FastAPI /resolve endpoint (not needed for the demo)
-# fastapi>=0.100.0
-# uvicorn[standard]>=0.23.0
+# Required for the web dashboard
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
