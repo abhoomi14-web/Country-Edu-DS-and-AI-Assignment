@@ -1,0 +1,24 @@
+# Required — install these before running Q2
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+joblib>=1.3.0
+ftfy>=6.1.0
+
+# Optional — enables DistilBERT classifier (TF-IDF fallback runs without it)
+# torch>=2.0.0
+# transformers>=4.30.0
+
+# Optional — enables SBERT embeddings for the knowledge base
+# sentence-transformers>=2.2.0
+
+# Optional — enables FAISS knowledge base search (TF-IDF cosine fallback runs without it)
+# faiss-cpu>=1.7.4
+
+# Optional — enables screenshot OCR (also requires Tesseract binary on PATH)
+# pillow>=10.0.0
+# pytesseract>=0.3.10
+
+# Optional — enables the FastAPI /resolve endpoint (not needed for the demo)
+# fastapi>=0.100.0
+# uvicorn[standard]>=0.23.0

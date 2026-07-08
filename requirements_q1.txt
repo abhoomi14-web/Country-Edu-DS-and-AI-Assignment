@@ -1,0 +1,16 @@
+# Required — install these before running Q1
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+xgboost>=1.7.0
+joblib>=1.3.0
+
+# Optional — enables the LSTM ensemble (XGBoost-only fallback runs without it)
+# tensorflow>=2.13.0
+
+# Optional — enables ADWIN drift detection for new client environments
+# river>=0.21.0
+
+# Optional — enables the FastAPI /predict endpoint (not needed for the demo)
+# fastapi>=0.100.0
+# uvicorn[standard]>=0.23.0
