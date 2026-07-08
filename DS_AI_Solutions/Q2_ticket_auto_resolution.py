@@ -670,7 +670,7 @@ class TicketAutoResolutionSystem:
 # ══════════════════════════════════════════════════════════════════════════════
 
 """
-Run:  uvicorn Q2_ticket_auto_resolution:app --host 0.0.0.0 --port 8001 --workers 4
+Run:  python run_q2.py   # auto-selects a free port and opens the dashboard
 
 POST /resolve        → single ticket resolution
 POST /resolve/batch  → batch (up to 500 tickets)

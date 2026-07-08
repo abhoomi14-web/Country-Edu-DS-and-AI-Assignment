@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Ticket Auto-Resolution</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+
+  header { background: #1a1d27; border-bottom: 1px solid #2d3148; padding: 18px 32px; display: flex; align-items: center; gap: 14px; }
+  header h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+  header .subtitle { font-size: 0.8rem; color: #64748b; }
+  .badge { background: #1e293b; border: 1px solid #334155; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; color: #94a3b8; margin-left: auto; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 32px 24px; display: grid; gap: 24px; }
+
+  .card { background: #1a1d27; border: 1px solid #2d3148; border-radius: 12px; padding: 24px; }
+  .card-title { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+
+  textarea {
+    width: 100%; background: #0f1117; border: 1px solid #2d3148; border-radius: 8px;
+    color: #e2e8f0; font-family: inherit; font-size: 0.9rem; line-height: 1.5;
+    padding: 12px 14px; resize: vertical; min-height: 100px;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { outline: none; border-color: #3b82f6; }
+  textarea::placeholder { color: #475569; }
+
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .example-btn {
+    background: #1e293b; border: 1px solid #334155; border-radius: 6px;
+    color: #94a3b8; font-size: 0.75rem; padding: 4px 10px; cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+  }
+  .example-btn:hover { background: #2d3748; color: #e2e8f0; }
+
+  .action-row { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+  #resolve-btn {
+    background: #3b82f6; color: #fff; border: none; border-radius: 8px;
+    padding: 10px 28px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  #resolve-btn:hover { background: #2563eb; }
+  #resolve-btn:active { transform: scale(0.97); }
+  #resolve-btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+  #status-msg { font-size: 0.82rem; color: #64748b; }
+
+  .spinner { display: none; width: 18px; height: 18px; border: 2px solid #334155; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Result area */
+  #result { display: none; }
+
+  .meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .cat-badge {
+    padding: 4px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .conf-wrap { flex: 1; min-width: 160px; }
+  .conf-label { font-size: 0.72rem; color: #64748b; margin-bottom: 4px; }
+  .conf-bar { height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; }
+  .conf-fill { height: 100%; border-radius: 3px; background: #3b82f6; transition: width 0.4s ease; }
+
+  .flags { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .flag {
+    padding: 3px 10px; border-radius: 5px; font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .flag-green  { background: rgba(34,197,94,0.12);  color: #22c55e; border: 1px solid rgba(34,197,94,0.25); }
+  .flag-yellow { background: rgba(234,179,8,0.12);  color: #eab308; border: 1px solid rgba(234,179,8,0.25); }
+  .flag-red    { background: rgba(239,68,68,0.12);  color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+  .flag-blue   { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+  .flag-gray   { background: rgba(100,116,139,0.12);color: #64748b; border: 1px solid rgba(100,116,139,0.25); }
+
+  .solutions-title { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .solution-item {
+    display: flex; gap: 14px; padding: 14px;
+    background: #161920; border: 1px solid #2d3148; border-radius: 8px; margin-bottom: 10px;
+  }
+  .solution-rank {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+    background: #1e293b; border: 1px solid #334155;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: #94a3b8;
+  }
+  .solution-body { flex: 1; }
+  .solution-text { font-size: 0.87rem; line-height: 1.55; color: #cbd5e1; }
+  .solution-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag { background: #1e293b; border: 1px solid #334155; border-radius: 4px; padding: 2px 7px; font-size: 0.68rem; color: #64748b; }
+
+  .meta-footer { font-size: 0.75rem; color: #475569; margin-top: 16px; }
+
+  .empty-result { text-align: center; padding: 40px 24px; color: #475569; font-size: 0.875rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+  </svg>
+  <div>
+    <h1>IT Ticket Auto-Resolution</h1>
+    <div class="subtitle">TF-IDF Classifier + Knowledge Base Retrieval — Q2 Dashboard</div>
+  </div>
+  <div class="badge">TF-IDF Mode</div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="card-title">Describe the issue</div>
+    <textarea id="ticket-text" placeholder="e.g. 'Cannot connect to VPN after Windows update' or 'Outlook keeps crashing when opening emails'"></textarea>
+
+    <div class="examples">
+      <span class="card-title" style="margin:0;display:flex;align-items:center">Try:</span>
+      <button class="example-btn" onclick="fill('Cannot connect to VPN after Windows update')">VPN not connecting</button>
+      <button class="example-btn" onclick="fill('Outlook crashes when opening attachments')">Outlook crashing</button>
+      <button class="example-btn" onclick="fill('Laptop running very slow, high CPU usage')">Slow laptop</button>
+      <button class="example-btn" onclick="fill('Printer not found on network, keeps showing offline')">Printer offline</button>
+      <button class="example-btn" onclick="fill('Cannot login to Office 365, password reset not working')">Login issue</button>
+      <button class="example-btn" onclick="fill('Software installation blocked by admin policy')">Install blocked</button>
+    </div>
+
+    <div class="action-row">
+      <button id="resolve-btn" onclick="resolve()">Resolve Ticket</button>
+      <div class="spinner" id="spinner"></div>
+      <span id="status-msg">Enter a ticket description and click Resolve.</span>
+    </div>
+  </div>
+
+  <div class="card" id="result">
+    <div class="card-title">Resolution Result</div>
+
+    <div class="meta-row">
+      <span class="cat-badge" id="cat-badge"></span>
+      <div class="conf-wrap">
+        <div class="conf-label">Confidence: <span id="conf-pct"></span></div>
+        <div class="conf-bar"><div class="conf-fill" id="conf-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="flags" id="flags-row"></div>
+
+    <div class="solutions-title">Suggested Solutions</div>
+    <div id="solutions-list"></div>
+
+    <div class="meta-footer" id="meta-footer"></div>
+  </div>
+</main>
+
+<script>
+const CAT_COLORS = {
+  'Network':        { bg: 'rgba(59,130,246,0.15)',  color: '#60a5fa',  border: 'rgba(59,130,246,0.3)' },
+  'Hardware':       { bg: 'rgba(168,85,247,0.15)',  color: '#c084fc',  border: 'rgba(168,85,247,0.3)' },
+  'Software':       { bg: 'rgba(34,197,94,0.15)',   color: '#4ade80',  border: 'rgba(34,197,94,0.3)'  },
+  'Access':         { bg: 'rgba(249,115,22,0.15)',  color: '#fb923c',  border: 'rgba(249,115,22,0.3)' },
+  'Email':          { bg: 'rgba(236,72,153,0.15)',  color: '#f472b6',  border: 'rgba(236,72,153,0.3)' },
+  'Performance':    { bg: 'rgba(234,179,8,0.15)',   color: '#facc15',  border: 'rgba(234,179,8,0.3)'  },
+  'Security':       { bg: 'rgba(239,68,68,0.15)',   color: '#f87171',  border: 'rgba(239,68,68,0.3)'  },
+};
+
+function getCatStyle(cat) {
+  for (const [key, style] of Object.entries(CAT_COLORS)) {
+    if (cat.toUpperCase().includes(key.toUpperCase())) return style;
+  }
+  return { bg: 'rgba(100,116,139,0.15)', color: '#94a3b8', border: 'rgba(100,116,139,0.3)' };
+}
+
+function fill(text) {
+  document.getElementById('ticket-text').value = text;
+  document.getElementById('ticket-text').focus();
+}
+
+async function resolve() {
+  const text = document.getElementById('ticket-text').value.trim();
+  if (!text) {
+    document.getElementById('status-msg').textContent = 'Please enter a ticket description first.';
+    return;
+  }
+
+  const btn = document.getElementById('resolve-btn');
+  const spinner = document.getElementById('spinner');
+  const msg = document.getElementById('status-msg');
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  msg.textContent = 'Classifying ticket and retrieving solutions…';
+
+  try {
+    const res = await fetch('/resolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, ticket_id: 'WEB-' + Date.now() }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || res.statusText);
+    }
+    const data = await res.json();
+    renderResult(data);
+    msg.textContent = `Resolved in ${data.response_time_ms}ms.`;
+  } catch (err) {
+    msg.textContent = 'Error: ' + err.message;
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function renderResult(d) {
+  document.getElementById('result').style.display = 'block';
+
+  // Category badge
+  const cat = d.predicted_category || 'Unknown';
+  const style = getCatStyle(cat);
+  const badge = document.getElementById('cat-badge');
+  badge.textContent = cat;
+  badge.style.background = style.bg;
+  badge.style.color = style.color;
+  badge.style.border = `1px solid ${style.border}`;
+
+  // Confidence
+  const pct = Math.round((d.confidence || 0) * 100);
+  document.getElementById('conf-pct').textContent = pct + '%';
+  document.getElementById('conf-fill').style.width = pct + '%';
+
+  // Flags
+  const flagsRow = document.getElementById('flags-row');
+  flagsRow.innerHTML = '';
+  if (d.auto_resolvable) flagsRow.innerHTML += '<span class="flag flag-green">Auto-Resolvable</span>';
+  if (d.needs_human_review) flagsRow.innerHTML += '<span class="flag flag-yellow">Needs Human Review</span>';
+  if (d.from_cache) flagsRow.innerHTML += '<span class="flag flag-blue">From Cache</span>';
+  if (!d.auto_resolvable && !d.needs_human_review) flagsRow.innerHTML += '<span class="flag flag-gray">Standard Resolution</span>';
+
+  // Solutions
+  const list = document.getElementById('solutions-list');
+  list.innerHTML = '';
+  if (d.suggested_solutions && d.suggested_solutions.length > 0) {
+    d.suggested_solutions.forEach(s => {
+      const tags = (s.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
+      list.innerHTML += `
+        <div class="solution-item">
+          <div class="solution-rank">${s.rank}</div>
+          <div class="solution-body">
+            <div class="solution-text">${s.solution}</div>
+            ${tags ? `<div class="solution-tags">${tags}</div>` : ''}
+          </div>
+        </div>`;
+    });
+  } else {
+    list.innerHTML = '<div class="empty-result">No solutions found in knowledge base.</div>';
+  }
+
+  // Meta footer
+  document.getElementById('meta-footer').textContent =
+    `Ticket ID: ${d.ticket_id}  ·  Response time: ${d.response_time_ms}ms`;
+}
+
+// Allow Ctrl+Enter to submit
+document.getElementById('ticket-text').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) resolve();
+});
+</script>
+</body>
+</html>

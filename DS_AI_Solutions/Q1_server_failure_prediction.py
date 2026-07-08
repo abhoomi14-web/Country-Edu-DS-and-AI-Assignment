@@ -630,7 +630,7 @@ def evaluate_model(y_true: np.ndarray, y_pred_prob: np.ndarray,
 
 """
 To run the API:
-    uvicorn Q1_server_failure_prediction:app --host 0.0.0.0 --port 8000
+    python run_q1.py   # auto-selects a free port and opens the dashboard
 
 Endpoint:  POST /predict
   Body: { "servers": [ { "server_id": "...", "cpu_usage_pct": ..., ... } ] }
