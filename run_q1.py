@@ -1,7 +1,8 @@
+import os
 import socket
+import subprocess
 import threading
 import time
-import webbrowser
 import urllib.request
 import uvicorn
 
@@ -12,13 +13,14 @@ def free_port():
 
 def open_when_ready(url):
     health = url + "/health"
-    for _ in range(150):  # wait up to 30s, check every 0.2s
+    for _ in range(150):  # poll every 0.2s, up to 30s
         try:
             urllib.request.urlopen(health, timeout=1)
-            webbrowser.open(url)
+            subprocess.Popen(["cmd", "/c", "start", "", url])
             return
         except Exception:
             time.sleep(0.2)
+    print(f"\n  Could not auto-open browser. Navigate manually to: {url}\n")
 
 if __name__ == "__main__":
     port = free_port()
